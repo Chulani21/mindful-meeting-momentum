@@ -1,29 +1,34 @@
-# Welcome to your Lovable project
+# WorkPilot AI — AI-Powered Workplace Productivity Assistant
 
-This project was built with [Lovable](https://lovable.dev).
+> Work smarter. Plan better. Achieve more.
 
-## Build with Lovable
+WorkPilot AI is a responsive SaaS dashboard with three AI features:
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+1. **Smart Email Generator** — formal, friendly or persuasive emails; edit, copy and regenerate.
+2. **Meeting Notes Summarizer** — key points, decisions, action items, owners and deadlines. Missing info is marked "Not specified"; nothing is invented.
+3. **AI Task Planner** — add, edit, delete and complete tasks with priorities and deadlines; generate daily or weekly schedules.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+The dashboard shows productivity statistics (emails generated, meetings summarized, completion rate, overdue tasks).
 
-## Development
+## Tech stack
+- React 19 + TypeScript, TanStack Start (SSR + server functions), Vite
+- Tailwind CSS v4 + shadcn/ui, lucide-react icons
+- Lovable AI Gateway (`openai/gpt-6-astra`) called **only from the server** with structured JSON-schema output
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Security & Responsible AI
+- The API key (`LOVABLE_API_KEY`) is read server-side only; it never reaches the browser.
+- Inputs are validated with Zod on the server and length-limited in the UI.
+- Prompts instruct the model never to fabricate facts, decisions or deadlines.
+- Every page shows a disclaimer: review AI output and do not submit confidential or sensitive information.
+- Tasks and stats are stored in the browser's localStorage.
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+## Setup
+```bash
+bun install        # or npm install
+echo "LOVABLE_API_KEY=your_key" > .env
+bun run dev        # http://localhost:8080
+bun run build      # production build
 ```
 
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+## Deploy / GitHub
+Connect the project to GitHub from Lovable (Settings → GitHub) and publish from Lovable, or deploy the build to any Cloudflare Workers–compatible host with `LOVABLE_API_KEY` set as a secret.
