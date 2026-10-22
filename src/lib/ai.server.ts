@@ -14,7 +14,7 @@ export async function callAI<T>(opts: {
   schemaName: string;
   schema: Record<string, unknown>;
 }): Promise<T> {
-  const key = process.env.LOVABLE_API_KEY;
+  const key = process.env['LOVABLE_API_KEY'];
   if (!key) throw new AIError("AI service is not configured.", 500);
 
   const res = await fetch(URL_, {
