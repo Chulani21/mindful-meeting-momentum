@@ -2,33 +2,75 @@
 
 > Work smarter. Plan better. Achieve more.
 
-WorkPilot AI is a responsive SaaS dashboard with three AI features:
+WorkPilot AI is a responsive SaaS dashboard that helps people get through a working day: write emails, turn meeting notes into decisions and action items, and plan tasks into a realistic schedule.
 
-1. **Smart Email Generator** — formal, friendly or persuasive emails; edit, copy and regenerate.
-2. **Meeting Notes Summarizer** — key points, decisions, action items, owners and deadlines. Missing info is marked "Not specified"; nothing is invented.
-3. **AI Task Planner** — add, edit, delete and complete tasks with priorities and deadlines; generate daily or weekly schedules.
+## Features
 
-The dashboard shows productivity statistics (emails generated, meetings summarized, completion rate, overdue tasks).
+### 1. Smart Email Generator
+Describe the purpose, recipient, key details and pick a tone — **formal**, **friendly** or **persuasive**. The draft comes back with a subject line and body you can edit in place, copy to the clipboard, or regenerate until it reads right.
+
+### 2. Meeting Notes Summarizer
+Paste raw meeting notes and get a structured summary: a short overview, key points, decisions that were actually agreed, and action items with owner and deadline. Anything the notes don't state is labelled **"Not specified"** rather than guessed.
+
+### 3. AI Task Planner
+Add, edit, complete and delete tasks with a priority (low / medium / high) and an optional deadline. Then generate a **daily** or **weekly** schedule from the open tasks — prioritised by deadline and urgency, using only the tasks you supplied.
+
+### Dashboard
+Productivity statistics at a glance: emails generated, meetings summarised, schedules planned, task completion rate, and overdue tasks.
 
 ## Tech stack
-- React 19 + TypeScript, TanStack Start (SSR + server functions), Vite
+- React 19 + TypeScript
+- TanStack Start v1 (file-based routing, SSR, server functions) on Vite
 - Tailwind CSS v4 + shadcn/ui, lucide-react icons
-- Lovable AI Gateway (`openai/gpt-6-astra`) called **only from the server** with structured JSON-schema output
+- Lovable AI Gateway (`openai/gpt-6-astra`) with streaming and strict JSON-schema output
 
-## Security & Responsible AI
-- The API key (`LOVABLE_API_KEY`) is read server-side only; it never reaches the browser.
-- Inputs are validated with Zod on the server and length-limited in the UI.
-- Prompts instruct the model never to fabricate facts, decisions or deadlines.
-- Every page shows a disclaimer: review AI output and do not submit confidential or sensitive information.
-- Tasks and stats are stored in the browser's localStorage.
-
-## Setup
-```bash
-bun install        # or npm install
-echo "LOVABLE_API_KEY=your_key" > .env
-bun run dev        # http://localhost:8080
-bun run build      # production build
+## Project structure
+```text
+src/
+  components/AppShell.tsx     sidebar + top bar layout used by every page
+  lib/ai.server.ts            server-only AI Gateway call (streaming, JSON schema)
+  lib/ai.functions.ts         server functions: generateEmail, summarizeMeeting, planSchedule
+  lib/store.ts                tasks + stats hooks backed by localStorage
+  routes/__root.tsx           app shell, <Toaster />, metadata
+  routes/index.tsx            dashboard          /
+  routes/email.tsx            email generator    /email
+  routes/meetings.tsx         notes summarizer   /meetings
+  routes/planner.tsx          task planner       /planner
+  test/                       vitest test suite
 ```
 
-## Deploy / GitHub
-Connect the project to GitHub from Lovable (Settings → GitHub) and publish from Lovable, or deploy the build to any Cloudflare Workers–compatible host with `LOVABLE_API_KEY` set as a secret.
+## Getting started
+```bash
+bun install            # or: npm install
+echo "LOVABLE_API_KEY=your_key" > .env
+bun run dev            # http://localhost:8080
+```
+
+### Scripts
+| Command | What it does |
+| --- | --- |
+| `bun run dev` | Start the dev server on port 8080 |
+| `bun run build` | Production build |
+| `bun run preview` | Serve the production build locally |
+| `bun run test` | Run the vitest suite |
+| `bun run lint` | ESLint |
+| `bun run format` | Prettier |
+
+The `LOVABLE_API_KEY` environment variable is required for the three AI features. Without it the app still loads, but generation shows a clear "AI service is not configured" message instead of failing silently.
+
+## Security & Responsible AI
+- The API key is read **server-side only** (`process.env.LOVABLE_API_KEY` inside a server function) and never ships to the browser.
+- Every request is validated with Zod on the server, and inputs are length-limited in the UI.
+- Prompts instruct the model never to fabricate facts, names, decisions or deadlines; missing information is reported as "Not specified".
+- Every page carries a disclaimer: review AI output before using it, and do not paste confidential or sensitive information.
+- AI responses are not stored or logged by the app (`store: false`).
+
+## Data storage
+Tasks and statistics are kept in the browser's localStorage under the keys `wp-tasks` and `wp-stats`. They survive a refresh and are shared between the pages of the app, but they are per-device and per-browser: there are no accounts, and nothing syncs between devices. Clearing site data resets the dashboard.
+
+## Deploy
+Connect the project to GitHub from Lovable (Settings → GitHub) and publish from Lovable, or deploy the build output to any Cloudflare Workers–compatible host with `LOVABLE_API_KEY` set as a secret rather than a plain environment value.
+
+## Notes
+- `src/routeTree.gen.ts` is generated by the router plugin — don't edit it by hand.
+- Styling uses Tailwind v4 through `src/styles.css` (CSS-first `@theme` tokens), so there is no `tailwind.config.js`.
